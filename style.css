@@ -1,0 +1,1001 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;900&family=Nunito:wght@400;600;700;800&display=swap');
+
+:root {
+    --gold: #FFD700;
+    --deep-gold: #B8860B;
+    --crimson: #DC143C;
+    --purple: #6B21A8;
+    --dark-purple: #3B0764;
+    --teal: #0D9488;
+    --bg-dark: #0A0A1A;
+    --bg-mid: #111132;
+    --panel: #1A1A3E;
+    --wall: #3D2B1F;
+    --floor: #1C1410;
+    --text-light: #F5E6D0;
+    --common: #A0A0A0;
+    --uncommon: #4ADE80;
+    --rare: #60A5FA;
+    --epic: #C084FC;
+    --legendary: #FFD700;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background: var(--bg-dark);
+    color: var(--text-light);
+    font-family: 'Nunito', sans-serif;
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+}
+
+/* ===== SCREENS ===== */
+.screen {
+    display: none;
+    width: 100%;
+    height: 100vh;
+}
+
+.screen.active {
+    display: flex;
+}
+
+/* ===== MENU ===== */
+#menuScreen {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(ellipse at center, #1a0533 0%, #0A0A1A 70%);
+    position: relative;
+    overflow: hidden;
+}
+
+#menuScreen::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23FFD700' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    pointer-events: none;
+}
+
+.menu-torch {
+    position: absolute;
+    font-size: 2rem;
+    animation: flicker 2s infinite;
+}
+
+.menu-torch.tl {
+    top: 10%;
+    left: 5%;
+}
+
+.menu-torch.tr {
+    top: 10%;
+    right: 5%;
+}
+
+.menu-torch.bl {
+    bottom: 10%;
+    left: 5%;
+}
+
+.menu-torch.br {
+    bottom: 10%;
+    right: 5%;
+}
+
+@keyframes flicker {
+
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.7;
+        transform: scale(1.1);
+    }
+
+    75% {
+        opacity: 0.9;
+        transform: scale(0.95);
+    }
+}
+
+.menu-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: clamp(1.8rem, 4.5vw, 3.5rem);
+    font-weight: 900;
+    text-align: center;
+    line-height: 1.3;
+    margin-bottom: 0.3em;
+    background: linear-gradient(180deg, #fff8dc 0%, #FFD700 40%, #B8860B 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.4));
+    z-index: 1;
+    text-transform: uppercase;
+}
+
+.menu-subtitle {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 600;
+    color: #9CA3AF;
+    font-size: 1rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 3rem;
+    z-index: 1;
+}
+
+.menu-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    z-index: 1;
+    min-width: 280px;
+}
+
+.menu-btn {
+    padding: 1rem 2rem;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    border: 2px solid;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.menu-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.menu-btn:hover::before {
+    opacity: 1;
+}
+
+.menu-btn:hover {
+    transform: scale(1.03);
+}
+
+.menu-btn:active {
+    transform: scale(0.98);
+}
+
+.btn-start {
+    background: linear-gradient(135deg, #7C3AED, #4C1D95);
+    border-color: var(--gold);
+    color: var(--gold);
+    box-shadow: 0 0 20px rgba(124, 58, 237, 0.5), inset 0 0 20px rgba(255, 215, 0, 0.05);
+}
+
+.btn-start::before {
+    background: rgba(255, 215, 0, 0.1);
+}
+
+.btn-start:hover {
+    box-shadow: 0 0 30px rgba(255, 215, 0, 0.4);
+}
+
+.btn-collection {
+    background: linear-gradient(135deg, #065F46, #022C22);
+    border-color: #4ADE80;
+    color: #4ADE80;
+    box-shadow: 0 0 15px rgba(74, 222, 128, 0.2);
+}
+
+.btn-collection::before {
+    background: rgba(74, 222, 128, 0.1);
+}
+
+.btn-intro {
+    background: linear-gradient(135deg, #1E40AF, #1E3A8A);
+    border-color: #60A5FA;
+    color: #60A5FA;
+    box-shadow: 0 0 15px rgba(96, 165, 250, 0.2);
+}
+
+.btn-intro::before {
+    background: rgba(96, 165, 250, 0.1);
+}
+
+.btn-quit {
+    background: rgba(220, 20, 60, 0.1);
+    border-color: #DC143C;
+    color: #DC143C;
+}
+
+.btn-quit::before {
+    background: rgba(220, 20, 60, 0.1);
+}
+
+/* ===== GAME SCREEN ===== */
+#gameScreen {
+    flex-direction: column;
+    background: var(--bg-dark);
+}
+
+/* HUD */
+.hud {
+    background: linear-gradient(180deg, #0D0D2B 0%, #111132 100%);
+    border-bottom: 2px solid var(--deep-gold);
+    padding: 0.8rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+.hud-level {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--gold);
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+    text-transform: uppercase;
+}
+
+.hud-stars {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+
+.hud-star {
+    font-size: 1.4rem;
+    transition: all 0.3s;
+    filter: drop-shadow(0 0 4px rgba(255, 215, 0, 0.3));
+}
+
+.hud-star.collected {
+    color: var(--gold);
+    filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.8));
+}
+
+.hud-star.uncollected {
+    color: #333;
+}
+
+.hud-actions {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    color: #60A5FA;
+}
+
+/* TOOLBAR */
+.toolbar {
+    background: #0D0D1F;
+    border-bottom: 1px solid #2D2D5F;
+    padding: 0.6rem 1rem;
+    display: flex;
+    gap: 0.7rem;
+    align-items: center;
+    flex-shrink: 0;
+    flex-wrap: wrap;
+}
+
+.tool-btn {
+    padding: 0.5rem 1.1rem;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.8rem;
+    border: 1.5px solid;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.tool-btn:hover {
+    transform: translateY(-1px);
+}
+
+.tool-btn:active {
+    transform: translateY(0);
+}
+
+.tool-btn.active {
+    box-shadow: 0 0 12px currentColor;
+}
+
+.tool-build {
+    background: rgba(16, 185, 129, 0.15);
+    border-color: #10B981;
+    color: #10B981;
+}
+
+.tool-build.active {
+    background: rgba(16, 185, 129, 0.35);
+}
+
+.tool-destroy {
+    background: rgba(239, 68, 68, 0.15);
+    border-color: #EF4444;
+    color: #EF4444;
+}
+
+.tool-destroy.active {
+    background: rgba(239, 68, 68, 0.35);
+}
+
+.tool-run {
+    background: rgba(255, 215, 0, 0.15);
+    border-color: var(--gold);
+    color: var(--gold);
+}
+
+.tool-run.active {
+    background: rgba(255, 215, 0, 0.25);
+}
+
+.tool-run:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.tool-restart {
+    background: rgba(139, 92, 246, 0.15);
+    border-color: #8B5CF6;
+    color: #8B5CF6;
+}
+
+.tool-speed {
+    background: rgba(56, 189, 248, 0.15);
+    border-color: #38BDF8;
+    color: #38BDF8;
+}
+
+.tool-menu {
+    background: rgba(156, 163, 175, 0.15);
+    border-color: #9CA3AF;
+    color: #9CA3AF;
+}
+
+.tool-separator {
+    width: 1px;
+    height: 24px;
+    background: #2D2D5F;
+    margin: 0 0.2rem;
+}
+
+.tool-info {
+    margin-left: auto;
+    font-size: 0.9rem;
+    color: #9CA3AF;
+    font-weight: 600;
+}
+
+/* GAME AREA & STACK PANEL */
+.game-area {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background: radial-gradient(ellipse at center, #111128 0%, #0A0A18 100%);
+    padding: 1rem;
+    position: relative;
+}
+
+#gameCanvas {
+    border: 2px solid var(--deep-gold);
+    box-shadow: 0 0 40px rgba(184, 134, 11, 0.3), inset 0 0 20px rgba(0, 0, 0, 0.5);
+    cursor: pointer;
+    image-rendering: pixelated;
+}
+
+/* Stack Panel UI */
+.stack-panel {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 220px;
+    max-width: 35%;
+    background: rgba(17, 17, 40, 0.92);
+    border-left: 2px solid var(--deep-gold);
+    display: flex;
+    flex-direction: column;
+    transform: translateX(100%);
+    transition: transform 0.3s ease-out;
+    z-index: 50;
+    backdrop-filter: blur(4px);
+    box-shadow: -10px 0 20px rgba(0, 0, 0, 0.5);
+}
+
+.stack-panel.active {
+    transform: translateX(0);
+}
+
+.stack-header {
+    padding: 1rem 0.5rem;
+    background: rgba(0, 0, 0, 0.4);
+    border-bottom: 2px solid var(--deep-gold);
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 800;
+    font-size: 0.9rem;
+    color: var(--gold);
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.stack-content {
+    flex: 1;
+    padding: 1rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    /* Thêm dòng này để khi nhảy scroll sẽ mượt hơn */
+    scroll-behavior: smooth;
+}
+
+.stack-item {
+    background: rgba(96, 165, 250, 0.1);
+    border: 1px solid rgba(96, 165, 250, 0.3);
+    color: #9CA3AF;
+    padding: 0.6rem;
+    border-radius: 4px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.85rem;
+    text-align: center;
+    font-weight: 600;
+    /* Loại bỏ animation ở đây để tránh nhảy loạn */
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+}
+
+.stack-item.top {
+    background: rgba(255, 215, 0, 0.15);
+    border-color: var(--gold);
+    color: var(--gold);
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+    /* Chỉ phần tử trên cùng mới có hiệu ứng nhẹ để người dùng dễ nhìn */
+    transform: scale(1.05);
+    z-index: 2;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* ===== MODALS ===== */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+}
+
+.modal-overlay.active {
+    display: flex;
+}
+
+.modal-box {
+    background: linear-gradient(135deg, #1A1A3E 0%, #0F0F2D 100%);
+    border: 2px solid var(--deep-gold);
+    border-radius: 8px;
+    padding: 2rem;
+    max-width: 500px;
+    width: 90%;
+    max-height: 85vh;
+    overflow-y: auto;
+    box-shadow: 0 0 60px rgba(184, 134, 11, 0.3);
+}
+
+.modal-title {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 800;
+    font-size: 1.6rem;
+    color: var(--gold);
+    text-align: center;
+    margin-bottom: 1.5rem;
+    text-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+    text-transform: uppercase;
+}
+
+.modal-close {
+    display: block;
+    padding: 0.8rem 1.5rem;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    background: rgba(184, 134, 11, 0.2);
+    border: 1.5px solid var(--deep-gold);
+    color: var(--gold);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.modal-close:hover {
+    background: rgba(255, 215, 0, 0.2);
+    transform: scale(1.03);
+}
+
+.modal-btn-group {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.btn-replay-modal {
+    background: rgba(139, 92, 246, 0.15);
+    border-color: #8B5CF6;
+    color: #8B5CF6;
+}
+
+.btn-replay-modal:hover {
+    background: rgba(139, 92, 246, 0.3);
+}
+
+.btn-log-modal {
+    background: rgba(56, 189, 248, 0.15);
+    border-color: #38BDF8;
+    color: #38BDF8;
+}
+
+.btn-log-modal:hover {
+    background: rgba(56, 189, 248, 0.3);
+}
+
+/* Stack Log Table Styles */
+.log-table-container {
+    max-height: 400px;
+    overflow-y: auto;
+    margin-bottom: 1.5rem;
+    border: 1px solid #2D2D5F;
+    border-radius: 6px;
+}
+
+.log-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+    text-align: left;
+}
+
+.log-table th,
+.log-table td {
+    padding: 0.7rem;
+    border-bottom: 1px solid #2D2D5F;
+}
+
+.log-table th {
+    background: rgba(0, 0, 0, 0.5);
+    color: var(--gold);
+    font-family: 'Montserrat', sans-serif;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+}
+
+.log-row-push {
+    background: rgba(16, 185, 129, 0.05);
+}
+
+.log-row-pop {
+    background: rgba(239, 68, 68, 0.05);
+}
+
+.log-row-star {
+    background: rgba(255, 215, 0, 0.1);
+    font-weight: 700;
+    color: #FCD34D;
+}
+
+.log-row-exit {
+    background: rgba(96, 165, 250, 0.1);
+    font-weight: 700;
+    color: #93C5FD;
+}
+
+/* Loot reveal */
+.loot-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.8rem;
+    border-radius: 6px;
+    margin-bottom: 0.8rem;
+    border: 1px solid;
+    position: relative;
+    overflow: hidden;
+}
+
+.loot-item::before {
+    content: '✨';
+    position: absolute;
+    right: 10px;
+    font-size: 1.2rem;
+    opacity: 0.5;
+}
+
+.loot-common {
+    background: rgba(160, 160, 160, 0.1);
+    border-color: var(--common);
+}
+
+.loot-uncommon {
+    background: rgba(74, 222, 128, 0.1);
+    border-color: var(--uncommon);
+}
+
+.loot-rare {
+    background: rgba(96, 165, 250, 0.1);
+    border-color: var(--rare);
+}
+
+.loot-epic {
+    background: rgba(192, 132, 252, 0.1);
+    border-color: var(--epic);
+}
+
+.loot-legendary {
+    background: rgba(255, 215, 0, 0.1);
+    border-color: var(--legendary);
+    animation: legendaryGlow 1s infinite;
+}
+
+@keyframes legendaryGlow {
+
+    0%,
+    100% {
+        box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+    }
+
+    50% {
+        box-shadow: 0 0 25px rgba(255, 215, 0, 0.7);
+    }
+}
+
+.loot-sword-art {
+    font-size: 2.5rem;
+}
+
+.loot-info {
+    flex: 1;
+}
+
+.loot-name {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    margin-bottom: 0.2rem;
+}
+
+.loot-rarity {
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.loot-desc {
+    font-size: 0.9rem;
+    color: #9CA3AF;
+    margin-top: 0.3rem;
+}
+
+.rarity-common {
+    color: var(--common);
+}
+
+.rarity-uncommon {
+    color: var(--uncommon);
+}
+
+.rarity-rare {
+    color: var(--rare);
+}
+
+.rarity-epic {
+    color: var(--epic);
+}
+
+.rarity-legendary {
+    color: var(--legendary);
+}
+
+/* Collection screen */
+#collectionScreen {
+    flex-direction: column;
+    background: var(--bg-dark);
+    align-items: center;
+}
+
+.collection-header {
+    padding: 1.5rem;
+    text-align: center;
+    border-bottom: 2px solid var(--deep-gold);
+    width: 100%;
+    background: #0D0D2B;
+}
+
+.collection-title {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 800;
+    font-size: 1.6rem;
+    color: var(--gold);
+    margin-bottom: 0.4rem;
+    text-transform: uppercase;
+}
+
+.collection-stats {
+    color: #9CA3AF;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.collection-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 1rem;
+    padding: 1.5rem;
+    overflow-y: auto;
+    width: 100%;
+    max-width: 900px;
+}
+
+.sword-card {
+    background: #111132;
+    border: 1.5px solid #2D2D5F;
+    border-radius: 8px;
+    padding: 1rem;
+    text-align: center;
+    transition: all 0.2s;
+    position: relative;
+}
+
+.sword-card.owned {
+    cursor: pointer;
+}
+
+.sword-card.owned:hover {
+    transform: scale(1.04);
+}
+
+.sword-card.locked {
+    filter: grayscale(1);
+    opacity: 0.35;
+}
+
+.sword-card .sword-icon {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.sword-card .sword-name {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 700;
+    margin-bottom: 0.4rem;
+}
+
+.sword-card .sword-rarity-badge {
+    font-size: 0.65rem;
+    font-weight: 800;
+    padding: 0.2rem 0.5rem;
+    border-radius: 20px;
+    border: 1px solid;
+    letter-spacing: 1px;
+    display: inline-block;
+}
+
+.sword-card .lock-icon {
+    font-size: 1.5rem;
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    opacity: 0.4;
+}
+
+.collection-back {
+    margin: 1rem;
+    padding: 0.8rem 2rem;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    background: rgba(184, 134, 11, 0.15);
+    border: 1.5px solid var(--deep-gold);
+    color: var(--gold);
+    border-radius: 6px;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: all 0.2s;
+}
+
+.collection-back:hover {
+    background: rgba(255, 215, 0, 0.2);
+}
+
+/* Intro screen */
+#introScreen {
+    flex-direction: column;
+    background: var(--bg-dark);
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+}
+
+.intro-box {
+    max-width: 650px;
+    background: #111132;
+    border: 2px solid var(--deep-gold);
+    border-radius: 8px;
+    padding: 2rem 2.5rem;
+    box-shadow: 0 0 40px rgba(184, 134, 11, 0.2);
+}
+
+.intro-box h2 {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 800;
+    color: var(--gold);
+    font-size: 1.5rem;
+    margin-bottom: 1.2rem;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+.intro-box h3 {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    color: #60A5FA;
+    font-size: 1.1rem;
+    margin: 1.5rem 0 0.8rem;
+    text-transform: uppercase;
+}
+
+.intro-box p,
+.intro-box li {
+    color: #E5E7EB;
+    line-height: 1.8;
+    font-size: 1rem;
+}
+
+.intro-box ul {
+    padding-left: 1.5rem;
+}
+
+.intro-box li {
+    margin-bottom: 0.5rem;
+}
+
+/* Score/end modal */
+.score-breakdown {
+    margin: 1.5rem 0;
+}
+
+.score-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #2D2D5F;
+    font-size: 1.05rem;
+}
+
+.score-total {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 800;
+    font-size: 1.3rem;
+    color: var(--gold);
+    display: flex;
+    justify-content: space-between;
+    padding: 1rem 0 0;
+    text-transform: uppercase;
+}
+
+.tool-speed-slider-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(56, 189, 248, 0.1);
+    padding: 5px 12px;
+    border-radius: 4px;
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    color: #38BDF8;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+}
+
+#speedSlider {
+    cursor: pointer;
+    accent-color: #38BDF8;
+    /* Màu xanh nước biển cho thanh trượt */
+    width: 100px;
+    height: 4px;
+}
+
+#speedValue {
+    display: inline-block;
+    min-width: 25px;
+    text-align: center;
+}
+
+.big-stars {
+    text-align: center;
+    font-size: 2.5rem;
+    margin: 0.5rem 0;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #0D0D2B;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--deep-gold);
+    border-radius: 4px;
+}
+
+/* Notification */
+#notification {
+    position: fixed;
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-20px);
+    background: linear-gradient(135deg, #1A1A3E, #0F0F2D);
+    border: 1.5px solid var(--gold);
+    color: var(--gold);
+    padding: 0.8rem 1.8rem;
+    border-radius: 6px;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    font-size: 0.9rem;
+    z-index: 200;
+    opacity: 0;
+    transition: all 0.3s;
+    pointer-events: none;
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+    text-transform: uppercase;
+}
+
+#notification.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}

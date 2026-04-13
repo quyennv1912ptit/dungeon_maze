@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hành Trình Khám Phá Hầm Ngục</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <div id="notification"></div>
+
+  <div id="menuScreen" class="screen active">
+    <div class="menu-torch tl">🔥</div>
+    <div class="menu-torch tr">🔥</div>
+    <div class="menu-torch bl">🔥</div>
+    <div class="menu-torch br">🔥</div>
+    <div class="menu-title">Hành Trình<br>Khám Phá<br>Hầm Ngục</div>
+    <div class="menu-subtitle">⚔ Dungeon Architect ⚔</div>
+    <div class="menu-buttons">
+      <button class="menu-btn btn-start" onclick="startGame()">⚔ Bắt Đầu</button>
+      <button class="menu-btn btn-collection" onclick="showCollection()">📖 Bộ Sưu Tập</button>
+      <button class="menu-btn btn-intro" onclick="showIntro()">📜 Giới Thiệu</button>
+      <button class="menu-btn btn-quit" onclick="quitGame()">🚪 Thoát</button>
+    </div>
+  </div>
+
+  <div id="gameScreen" class="screen">
+    <div class="hud">
+      <div class="hud-level" id="hudLevel">Màn 1 / 5</div>
+      <div class="hud-stars" id="hudStars"></div>
+      <div class="hud-actions" id="hudActions">⚡ Lượt: 10</div>
+    </div>
+    <div class="toolbar">
+      <button class="tool-btn tool-build active" id="btnBuild" onclick="setTool('build')">🧱 Xây Dựng</button>
+      <button class="tool-btn tool-destroy" id="btnDestroy" onclick="setTool('destroy')">💥 Phá Hủy</button>
+      <div class="tool-separator"></div>
+      <button class="tool-btn tool-run" id="btnRun" onclick="runDFS()">▶ Chạy</button>
+      <button class="tool-btn tool-restart" onclick="restartLevel()">🔄 Chơi Lại</button>
+      <div class="tool-separator"></div>
+      <div class="tool-speed-slider-container">
+        <label for="speedSlider">⚡ Tốc độ: <span id="speedValue">1.0</span>x</label>
+        <input type="range" id="speedSlider" min="0.1" max="4" step="0.1" value="1" oninput="updateSpeed(this.value)">
+      </div> <button class="tool-btn tool-menu" onclick="goMenu()">🏠 Menu</button>
+      <div class="tool-info" id="toolInfo">Chọn ô để xây tường</div>
+    </div>
+    <div class="game-area">
+      <canvas id="gameCanvas"></canvas>
+      <div id="stackPanel" class="stack-panel">
+        <div class="stack-header">Ngăn Xếp DFS</div>
+        <div class="stack-content" id="stackContent">
+          <div style="color:#666;text-align:center;font-style:italic;font-size:0.85rem">Đang chờ thuật toán...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="collectionScreen" class="screen">
+    <div class="collection-header">
+      <div class="collection-title">📖 Đại Từ Điển Binh Khí</div>
+      <div class="collection-stats" id="collectionStats">0 / 30 thanh kiếm</div>
+    </div>
+    <div class="collection-grid" id="collectionGrid"></div>
+    <button class="collection-back" onclick="showScreen('menuScreen')">← Quay Lại</button>
+  </div>
+
+  <div id="introScreen" class="screen">
+    <div class="intro-box">
+      <h2>📜 Giới Thiệu</h2>
+      <h3>🎭 Vai Trò</h3>
+      <p>Bạn là <strong>Kiến Trúc Sư Hầm Ngục</strong> — không điều khiển nhân vật trực tiếp mà thao túng không gian để
+        dẫn lối!</p>
+
+      <h3>🎮 Cách Chơi</h3>
+      <ul>
+        <li><strong>Xây Dựng:</strong> Đặt tường mới để chặn đường</li>
+        <li><strong>Phá Hủy:</strong> Đập tường có sẵn để mở lối</li>
+        <li><strong>Chạy:</strong> Kích hoạt thuật toán DFS — nhân vật tự di chuyển</li>
+        <li>Mỗi màn có <strong>10 lượt cơ bản</strong>. Sẽ được cộng thêm lượt bằng số sao nhặt được ở màn trước, và giữ
+          lại số lượt thừa nếu bạn tiết kiệm được trên 10 lượt!</li>
+      </ul>
+
+      <h3>⭐ Ngôi Sao & Phần Thưởng</h3>
+      <ul>
+        <li>5 ngôi sao xuất hiện ngẫu nhiên trên bản đồ</li>
+        <li>DFS đi qua ngôi sao = nhận rương báu chứa <strong>thanh kiếm ngẫu nhiên</strong></li>
+        <li>Càng nhiều sao, điểm càng cao!</li>
+      </ul>
+
+      <h3>🧠 Thuật Toán DFS</h3>
+      <p>Nhân vật ưu tiên đi theo thứ tự: <strong>Trên → Phải → Dưới → Trái</strong>. Hãy thiết kế mê cung sao cho DFS
+        đi qua nhiều ngôi sao nhất!</p>
+
+      <h3>⚔ Bộ Sưu Tập & Reset</h3>
+      <p>Nút "Chơi Lại" giúp bạn xóa mọi tường vừa xây để làm lại từ đầu mê cung đó. Thu thập đủ 30 loại kiếm để trở
+        thành nhà vô địch!</p>
+    </div>
+    <button class="collection-back" onclick="showScreen('menuScreen')" style="margin-top:1.5rem">← Quay Lại</button>
+  </div>
+
+  <div class="modal-overlay" id="lootModal">
+    <div class="modal-box">
+      <div class="modal-title">🎁 Rương Báu Mở Ra!</div>
+      <div id="lootContent"></div>
+      <div class="modal-btn-group">
+        <button class="modal-close" id="lootContinue" style="margin:0" onclick="closeLoot()">Tiếp Tục →</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="levelEndModal">
+    <div class="modal-box">
+      <div class="modal-title" id="levelEndTitle">Màn Kết Thúc!</div>
+      <div class="big-stars" id="levelEndStars"></div>
+      <div class="score-breakdown" id="levelEndScore"></div>
+
+      <div class="modal-btn-group">
+        <button class="modal-close btn-log-modal" onclick="showStackLog()">📜 Xem Lịch Sử DFS</button>
+        <button class="modal-close btn-replay-modal" id="btnReplayModal" onclick="restartFromModal()">🔄 Chơi Lại
+          (2)</button>
+        <button class="modal-close" id="levelEndBtn" style="margin:0" onclick="processLevelTransition()">Màn Tiếp Theo
+          →</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="gameEndModal">
+    <div class="modal-box">
+      <div class="modal-title">🏆 Hành Trình Hoàn Thành!</div>
+      <div class="big-stars" id="gameEndStars"></div>
+      <div class="score-breakdown" id="gameEndScore"></div>
+      <div class="modal-btn-group">
+        <button class="modal-close" style="margin:0" onclick="showScreen('menuScreen'); closeAllModals()">🏠 Về
+          Menu</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="stackLogModal">
+    <div class="modal-box" style="max-width: 750px;">
+      <div class="modal-title">📜 Lịch Sử Thuật Toán DFS</div>
+      <div class="log-table-container">
+        <table class="log-table">
+          <thead>
+            <tr>
+              <th width="8%">Bước</th>
+              <th width="20%">Hành Động</th>
+              <th width="15%">Tọa Độ</th>
+              <th width="57%">Trạng Thái Stack (Đỉnh → Đáy)</th>
+            </tr>
+          </thead>
+          <tbody id="stackLogBody"></tbody>
+        </table>
+      </div>
+      <div class="modal-btn-group">
+        <button class="modal-close" onclick="closeStackLog()">← Quay Lại Bảng Điểm</button>
+      </div>
+    </div>
+  </div>
+  <script src="index.js"></script>
+
+</body>
+
+</html>
