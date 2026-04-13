@@ -96,6 +96,19 @@ function showScreen(id) {
     document.getElementById(id).classList.add('active');
 }
 
+function showCollection() {
+    renderCollection();
+    showScreen('collectionScreen');
+}
+
+function showIntro() {
+    showScreen('introScreen');
+}
+
+function closeLoot() {
+    closeAllModals();
+}
+
 function closeAllModals() {
     document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
 }
