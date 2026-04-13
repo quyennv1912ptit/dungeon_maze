@@ -77,6 +77,9 @@ let heroPx = { x: 0, y: 0 };
 let componentColors = [];
 let componentCount = 0;
 
+let finalPathCoords = []; // Lưu tọa độ đường đi chuẩn (không tính bước lùi)
+let showArrows = false;   // Cờ bật/tắt vẽ mũi tên
+
 // Speed Control
 let speedMultiplier = 1;
 const BASE_SPEED = 6;
@@ -202,8 +205,10 @@ function updateSpeed(val) {
 // LEVEL GENERATION
 // ============================================================
 function generateLevel() {
+    showArrows = false; finalPathCoords = [];
     if (animFrame) cancelAnimationFrame(animFrame);
     toggleStackPanel(false);
+
 
     // Reset states
     componentColors = [];
@@ -288,6 +293,7 @@ function posEq(a, b) { return a.r === b.r && a.c === b.c; }
 // RESTART & TOOLS
 // ============================================================
 function restartLevel() {
+    showArrows = false; finalPathCoords = [];
     if (animFrame) cancelAnimationFrame(animFrame);
     running = false; isPaused = false; pathIdx = 0;
     updateRunButton();
@@ -382,13 +388,14 @@ function findConnectedComponents() {
             }
         }
     }
-    showNotif(`Tìm thấy ${componentCount} vùng liên thông!`);
+    showNotif(`Tìm thấy ${componentCount} vùng liên thông!`, 3000);
 }
 
 function runDFS() {
     if (!running) {
         findConnectedComponents();
         running = true; isPaused = false; pathIdx = 0; starsOnPath = [];
+        showArrows = false; // Reset cờ mũi tên
         toggleStackPanel(true);
 
         const workGrid = grid.map(row => [...row]);
@@ -396,15 +403,30 @@ function runDFS() {
         dfsPath = [];
         let currentStack = [];
 
+        let currentPathCoords = []; // Track đường đi hiện tại
+        finalPathCoords = []; // Reset đường đi cuối cùng
+
         const dfs = (r, c, pR, pC) => {
             if (r < 0 || r >= rows || c < 0 || c >= cols || visited[r][c] || workGrid[r][c] === CELL.WALL) return false;
             visited[r][c] = true;
+
             currentStack.push(`[C${c}, D${r}]`);
+            currentPathCoords.push({ r, c }); // Lưu tọa độ vào path tạm
+
             dfsPath.push({ r, c, type: workGrid[r][c], isBacktrack: false, stackState: [...currentStack] });
-            if (workGrid[r][c] === CELL.EXIT) return true;
+
+            // Nếu đến đích, CHỐT đường đi thành công
+            if (workGrid[r][c] === CELL.EXIT) {
+                finalPathCoords = [...currentPathCoords];
+                return true;
+            }
+
             const dirs = [[-1, 0], [0, 1], [1, 0], [0, -1]];
             for (const [dr, dc] of dirs) if (dfs(r + dr, c + dc, r, c)) return true;
+
             currentStack.pop();
+            currentPathCoords.pop(); // Rút lui thì xóa tọa độ khỏi path tạm
+
             if (pR !== undefined) dfsPath.push({ r: pR, c: pC, type: workGrid[pR][pC], isBacktrack: true, stackState: [...currentStack] });
             return false;
         };
@@ -423,12 +445,30 @@ function runDFS() {
 
 function animate() {
     if (!running || isPaused) return;
+
+    // KIỂM TRA ĐÃ CHẠY HẾT ĐƯỜNG ĐI CHƯA
     if (pathIdx >= dfsPath.length) {
-        running = false; updateRunButton();
-        showLootSequence(starsOnPath, () => showLevelEnd(starsOnPath.length));
+        running = false;
+        updateRunButton();
+
+        // KÍCH HOẠT VẼ MŨI TÊN
+        showArrows = true;
+        drawGrid(); // Vẽ lại lưới để mũi tên hiện lên
+        drawHero(); // Vẽ lại nhân vật lên trên cùng
+
+        showNotif('Hoàn thành! Dừng 10 giây để xem lại đường đi...', 10000);
+
+        setTimeout(() => {
+            if (document.getElementById('gameScreen').classList.contains('active')) {
+                showLootSequence(starsOnPath, () => showLevelEnd(starsOnPath.length));
+                showArrows = false; // Tắt mũi tên khi mở hộp thoại
+            }
+        }, 10000);
+
         return;
     }
 
+    // ... (Phần code tính toán tọa độ hero bên dưới giữ y nguyên như cũ)
     const step = dfsPath[pathIdx];
     const targetX = step.c * cellSize + cellSize / 2, targetY = step.r * cellSize + cellSize / 2;
     const speed = BASE_SPEED * speedMultiplier;
@@ -438,7 +478,9 @@ function animate() {
     if (dist <= speed) {
         heroPx.x = targetX; heroPx.y = targetY;
         renderStackUI(step.stackState);
-        if (step.isBacktrack) { if (pathIdx > 0) cellRenderState[dfsPath[pathIdx - 1].r][dfsPath[pathIdx - 1].c] = 2; }
+        if (step.isBacktrack) {
+            if (pathIdx > 0) cellRenderState[dfsPath[pathIdx - 1].r][dfsPath[pathIdx - 1].c] = 2;
+        }
         else {
             cellRenderState[step.r][step.c] = 1;
             if (step.type === CELL.STAR && grid[step.r][step.c] === CELL.STAR) {
@@ -486,6 +528,44 @@ function drawGrid() {
             if (grid[r][c] === CELL.START) { ctx.fillStyle = COLORS.start; ctx.fillRect(x + 1, y + 1, cellSize - 2, cellSize - 2); ctx.fillText('🚪', cx, cy); }
             else if (grid[r][c] === CELL.EXIT) { ctx.fillStyle = COLORS.exit; ctx.fillRect(x + 1, y + 1, cellSize - 2, cellSize - 2); ctx.fillText('🏁', cx, cy); }
             else if (grid[r][c] === CELL.STAR) { ctx.fillText('⭐', cx, cy); }
+
+            if (showArrows && finalPathCoords && finalPathCoords.length > 0) {
+                ctx.fillStyle = '#FDE047'; // Màu vàng sáng cho mũi tên
+                ctx.font = `bold ${Math.floor(cellSize * 0.6)}px sans-serif`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+
+                // Vẽ bóng đen để mũi tên nổi bật không bị chìm vào màu nền
+                ctx.shadowColor = "rgba(0,0,0,0.8)";
+                ctx.shadowBlur = 4;
+                ctx.shadowOffsetX = 1;
+                ctx.shadowOffsetY = 1;
+
+                // Bỏ qua ô cuối cùng (vì ô Đích không có hướng đi tiếp theo)
+                for (let i = 0; i < finalPathCoords.length - 1; i++) {
+                    const curr = finalPathCoords[i];
+                    const next = finalPathCoords[i + 1];
+
+                    let arrow = '';
+                    // So sánh tọa độ để biết hướng đi
+                    if (next.r < curr.r) arrow = '↑';
+                    else if (next.r > curr.r) arrow = '↓';
+                    else if (next.c < curr.c) arrow = '←';
+                    else if (next.c > curr.c) arrow = '→';
+
+                    if (arrow) {
+                        const cx = curr.c * cellSize + cellSize / 2;
+                        const cy = curr.r * cellSize + cellSize / 2;
+                        ctx.fillText(arrow, cx, cy);
+                    }
+                }
+
+                // Tắt hiệu ứng bóng đổ để không ảnh hưởng đến các thành phần khác
+                ctx.shadowColor = "transparent";
+                ctx.shadowBlur = 0;
+                ctx.shadowOffsetX = 0;
+                ctx.shadowOffsetY = 0;
+            }
         }
     }
 }
