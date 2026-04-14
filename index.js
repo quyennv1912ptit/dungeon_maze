@@ -205,6 +205,9 @@ function updateSpeed(val) {
 // LEVEL GENERATION
 // ============================================================
 function generateLevel() {
+    const rewardBtn = document.getElementById('btnClaimReward');
+    if (rewardBtn) rewardBtn.style.display = 'none';
+
     showArrows = false; finalPathCoords = [];
     if (animFrame) cancelAnimationFrame(animFrame);
     toggleStackPanel(false);
@@ -293,6 +296,8 @@ function posEq(a, b) { return a.r === b.r && a.c === b.c; }
 // RESTART & TOOLS
 // ============================================================
 function restartLevel() {
+    const rewardBtn = document.getElementById('btnClaimReward');
+    if (rewardBtn) rewardBtn.style.display = 'none';
     showArrows = false; finalPathCoords = [];
     if (animFrame) cancelAnimationFrame(animFrame);
     running = false; isPaused = false; pathIdx = 0;
@@ -446,24 +451,19 @@ function runDFS() {
 function animate() {
     if (!running || isPaused) return;
 
-    // KIỂM TRA ĐÃ CHẠY HẾT ĐƯỜNG ĐI CHƯA
     if (pathIdx >= dfsPath.length) {
         running = false;
         updateRunButton();
 
         // KÍCH HOẠT VẼ MŨI TÊN
         showArrows = true;
-        drawGrid(); // Vẽ lại lưới để mũi tên hiện lên
-        drawHero(); // Vẽ lại nhân vật lên trên cùng
+        drawGrid(); 
+        drawHero(); 
 
-        showNotif('Hoàn thành! Dừng 10 giây để xem lại đường đi...', 10000);
+        showNotif('Hoàn thành! Nhấn nút để nhận thưởng.', 3000);
 
-        setTimeout(() => {
-            if (document.getElementById('gameScreen').classList.contains('active')) {
-                showLootSequence(starsOnPath, () => showLevelEnd(starsOnPath.length));
-                showArrows = false; // Tắt mũi tên khi mở hộp thoại
-            }
-        }, 10000);
+        // Gọi hàm hiện nút thay vì dùng setTimeout đếm ngược
+        showRewardButton(starsOnPath);
 
         return;
     }
@@ -505,68 +505,86 @@ const COLORS = {
 
 function drawGrid() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // 1. VẼ TOÀN BỘ SÀN VÀ TƯỜNG TRƯỚC
     for (let r = 0; r < rows; r++) {
         for (let c = 0; c < cols; c++) {
             const x = c * cellSize, y = r * cellSize;
-            ctx.fillStyle = COLORS.floor; ctx.fillRect(x, y, cellSize, cellSize);
+            ctx.fillStyle = COLORS.floor; 
+            ctx.fillRect(x, y, cellSize, cellSize);
 
             if (componentColors[r] && componentColors[r][c]) {
-                ctx.fillStyle = componentColors[r][c]; ctx.fillRect(x, y, cellSize, cellSize);
+                ctx.fillStyle = componentColors[r][c]; 
+                ctx.fillRect(x, y, cellSize, cellSize);
             }
-            if (cellRenderState[r][c] === 1) { ctx.fillStyle = COLORS.visited; ctx.fillRect(x, y, cellSize, cellSize); }
-            else if (cellRenderState[r][c] === 2) { ctx.fillStyle = COLORS.backtracked; ctx.fillRect(x, y, cellSize, cellSize); }
+            if (cellRenderState[r][c] === 1) { 
+                ctx.fillStyle = COLORS.visited; 
+                ctx.fillRect(x, y, cellSize, cellSize); 
+            } else if (cellRenderState[r][c] === 2) { 
+                ctx.fillStyle = COLORS.backtracked; 
+                ctx.fillRect(x, y, cellSize, cellSize); 
+            }
 
-            ctx.strokeStyle = COLORS.grid; ctx.lineWidth = 0.5; ctx.strokeRect(x, y, cellSize, cellSize);
+            ctx.strokeStyle = COLORS.grid; 
+            ctx.lineWidth = 0.5; 
+            ctx.strokeRect(x, y, cellSize, cellSize);
 
             if (grid[r][c] === CELL.WALL) {
                 ctx.fillStyle = COLORS.wall; ctx.fillRect(x, y, cellSize, cellSize);
                 ctx.fillStyle = COLORS.wallTop; ctx.fillRect(x, y, cellSize, 4);
             }
+            
             const fs = Math.floor(cellSize * 0.55);
-            ctx.font = `${fs}px sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.font = `${fs}px sans-serif`; 
+            ctx.textAlign = 'center'; 
+            ctx.textBaseline = 'middle';
             const cx = x + cellSize / 2, cy = y + cellSize / 2;
-            if (grid[r][c] === CELL.START) { ctx.fillStyle = COLORS.start; ctx.fillRect(x + 1, y + 1, cellSize - 2, cellSize - 2); ctx.fillText('🚪', cx, cy); }
-            else if (grid[r][c] === CELL.EXIT) { ctx.fillStyle = COLORS.exit; ctx.fillRect(x + 1, y + 1, cellSize - 2, cellSize - 2); ctx.fillText('🏁', cx, cy); }
-            else if (grid[r][c] === CELL.STAR) { ctx.fillText('⭐', cx, cy); }
-
-            if (showArrows && finalPathCoords && finalPathCoords.length > 0) {
-                ctx.fillStyle = '#FDE047'; // Màu vàng sáng cho mũi tên
-                ctx.font = `bold ${Math.floor(cellSize * 0.6)}px sans-serif`;
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-
-                // Vẽ bóng đen để mũi tên nổi bật không bị chìm vào màu nền
-                ctx.shadowColor = "rgba(0,0,0,0.8)";
-                ctx.shadowBlur = 4;
-                ctx.shadowOffsetX = 1;
-                ctx.shadowOffsetY = 1;
-
-                // Bỏ qua ô cuối cùng (vì ô Đích không có hướng đi tiếp theo)
-                for (let i = 0; i < finalPathCoords.length - 1; i++) {
-                    const curr = finalPathCoords[i];
-                    const next = finalPathCoords[i + 1];
-
-                    let arrow = '';
-                    // So sánh tọa độ để biết hướng đi
-                    if (next.r < curr.r) arrow = '↑';
-                    else if (next.r > curr.r) arrow = '↓';
-                    else if (next.c < curr.c) arrow = '←';
-                    else if (next.c > curr.c) arrow = '→';
-
-                    if (arrow) {
-                        const cx = curr.c * cellSize + cellSize / 2;
-                        const cy = curr.r * cellSize + cellSize / 2;
-                        ctx.fillText(arrow, cx, cy);
-                    }
-                }
-
-                // Tắt hiệu ứng bóng đổ để không ảnh hưởng đến các thành phần khác
-                ctx.shadowColor = "transparent";
-                ctx.shadowBlur = 0;
-                ctx.shadowOffsetX = 0;
-                ctx.shadowOffsetY = 0;
+            
+            if (grid[r][c] === CELL.START) { 
+                ctx.fillStyle = COLORS.start; 
+                ctx.fillRect(x + 1, y + 1, cellSize - 2, cellSize - 2); 
+                ctx.fillText('🚪', cx, cy); 
+            } else if (grid[r][c] === CELL.EXIT) { 
+                ctx.fillStyle = COLORS.exit; 
+                ctx.fillRect(x + 1, y + 1, cellSize - 2, cellSize - 2); 
+                ctx.fillText('🏁', cx, cy); 
+            } else if (grid[r][c] === CELL.STAR) { 
+                ctx.fillText('⭐', cx, cy); 
             }
         }
+    }
+
+    // 2. VẼ ĐƯỜNG ĐI LIỀN MẠCH (Nằm ngoài 2 vòng lặp trên)
+    if (showArrows && finalPathCoords && finalPathCoords.length > 0) {
+        ctx.beginPath();
+        
+        // Cấu hình nét vẽ để tạo cảm giác "đường ống" mượt mà
+        ctx.strokeStyle = '#FDE047'; // Màu vàng sáng
+        ctx.lineWidth = Math.max(4, Math.floor(cellSize * 0.25)); // Độ dày linh hoạt theo kích thước ô
+        ctx.lineCap = 'round'; // Bo tròn điểm đầu và điểm cuối
+        ctx.lineJoin = 'round'; // Bo tròn các góc cua (RẤT QUAN TRỌNG ĐỂ NHÌN MƯỢT)
+        
+        // Hiệu ứng phát sáng nhẹ
+        ctx.shadowColor = '#F59E0B'; 
+        ctx.shadowBlur = 8;
+
+        for (let i = 0; i < finalPathCoords.length; i++) {
+            const curr = finalPathCoords[i];
+            const cx = curr.c * cellSize + cellSize / 2;
+            const cy = curr.r * cellSize + cellSize / 2;
+
+            if (i === 0) {
+                ctx.moveTo(cx, cy); // Bắt đầu từ tâm ô đầu tiên
+            } else {
+                ctx.lineTo(cx, cy); // Kéo vạch tới tâm các ô tiếp theo
+            }
+        }
+        
+        ctx.stroke(); // Thực thi lệnh vẽ đường
+
+        // Reset lại hiệu ứng bóng đổ để không ảnh hưởng tới nhân vật hay các element khác
+        ctx.shadowColor = 'transparent';
+        ctx.shadowBlur = 0;
     }
 }
 
@@ -608,8 +626,10 @@ function rollSword() {
 
 function showLootSequence(starsOnPath, callback) {
     if (starsOnPath.length === 0) { callback(); return; }
+    
     const loot = starsOnPath.map(() => rollSword());
     state.pendingLoot = loot;
+    
     document.getElementById('lootContent').innerHTML = loot.map(s => `
         <div class="loot-item loot-${s.rarity}">
           <div class="loot-sword-art">${s.icon}</div>
@@ -619,8 +639,23 @@ function showLootSequence(starsOnPath, callback) {
             <div class="loot-desc">${s.desc}</div>
           </div>
         </div>`).join('');
+        
     document.getElementById('lootModal').classList.add('active');
-    document.getElementById('lootContinue').onclick = () => { closeAllModals(); callback(); };
+    
+    const btnContinue = document.getElementById('lootContinue');
+    btnContinue.disabled = false; // Đảm bảo nút ở trạng thái bật
+    
+    // Gán lại sự kiện onclick
+    btnContinue.onclick = (e) => {
+        e.preventDefault();
+        btnContinue.disabled = true; // Khóa nút ngay lập tức để chống spam nháy đúp
+        closeAllModals(); 
+        
+        // Dùng setTimeout 300ms để tạo độ trễ, ngăn lỗi click xuyên tới modal bên dưới
+        setTimeout(() => {
+            callback();
+        }, 300);
+    };
 }
 
 function showLevelEnd(starsGot) {
@@ -663,6 +698,70 @@ function renderCollection() {
           <div class="sword-name">${owned ? s.name : '???'}</div>
         </div>`;
     }).join('');
+}
+
+// ============================================================
+// NÚT CHUYỂN MÀN THỦ CÔNG
+// ============================================================
+function showRewardButton(starsOnPath) {
+    let btn = document.getElementById('btnClaimReward');
+    
+    // Nếu nút chưa tồn tại thì tạo mới
+    if (!btn) {
+        btn = document.createElement('button');
+        btn.id = 'btnClaimReward';
+        btn.innerHTML = '🎁 Nhận Thưởng';
+        
+        // CẬP NHẬT CSS: Đưa nút xuống dưới cùng, căn giữa ngang
+        Object.assign(btn.style, {
+            position: 'absolute',
+            bottom: '20px',             // Cách mép dưới 20px
+            left: '50%',                // Căn giữa theo chiều ngang
+            transform: 'translateX(-50%)', // Đẩy lùi lại 50% chiều rộng của chính nó
+            padding: '12px 30px',
+            fontSize: '1.5rem',
+            fontWeight: 'bold',
+            color: '#fff',
+            backgroundColor: '#F59E0B', 
+            border: '3px solid #FFF',
+            borderRadius: '12px',
+            cursor: 'pointer',
+            boxShadow: '0 8px 16px rgba(0,0,0,0.5)',
+            zIndex: '1000',
+            transition: 'transform 0.2s, background-color 0.2s'
+        });
+
+        // Hiệu ứng Hover (phóng to nhẹ lên trên)
+        btn.onmouseover = () => {
+            btn.style.transform = 'translateX(-50%) scale(1.1)';
+            btn.style.backgroundColor = '#D97706'; // Đổi màu đậm hơn xíu
+        };
+        btn.onmouseout = () => {
+            btn.style.transform = 'translateX(-50%) scale(1)';
+            btn.style.backgroundColor = '#F59E0B';
+        };
+
+        // Chèn nút vào vùng chứa game
+        const gameArea = document.querySelector('.game-area');
+        if (gameArea) {
+            gameArea.style.position = 'relative'; 
+            gameArea.appendChild(btn);
+        } else {
+            document.body.appendChild(btn);
+        }
+    }
+    
+    btn.style.display = 'block'; 
+    
+    // Xử lý sự kiện click
+    btn.onclick = () => {
+        btn.style.display = 'none'; 
+        showArrows = false; 
+        drawGrid(); 
+        drawHero();
+        
+        showLootSequence(starsOnPath, () => showLevelEnd(starsOnPath.length));
+    };
 }
 
 // Animation loop for pulsing stars
