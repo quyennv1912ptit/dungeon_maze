@@ -1,6 +1,3 @@
-// ============================================================
-// DATA
-// ============================================================
 const SWORDS = [
     { id: 's01', name: 'Kiếm Gỉ Sét', icon: '🗡️', rarity: 'common', desc: 'Cũ kỹ nhưng vẫn sắc bén.' },
     { id: 's02', name: 'Dao Găm Gỗ', icon: '🔪', rarity: 'common', desc: 'Làm từ gỗ cứng rừng sâu.' },
@@ -38,9 +35,6 @@ const RARITY_WEIGHTS = { common: 45, uncommon: 30, rare: 16, epic: 7, legendary:
 const RARITY_LABELS = { common: 'Thường', uncommon: 'Không Phổ Biến', rare: 'Hiếm', epic: 'Sử Thi', legendary: 'Huyền Thoại' };
 const RARITY_COLORS = { common: '#A0A0A0', uncommon: '#4ADE80', rare: '#60A5FA', epic: '#C084FC', legendary: '#FFD700' };
 
-// ============================================================
-// GAME STATE
-// ============================================================
 let state = {
     screen: 'menu',
     level: 1,
@@ -64,7 +58,6 @@ let starsCollected = 0;
 let actionPoints = 0;
 let currentTool = 'build';
 
-// DFS & Animation Control
 let running = false;
 let isPaused = false;
 let animFrame = null;
@@ -73,27 +66,22 @@ let pathIdx = 0;
 let starsOnPath = [];
 let heroPx = { x: 0, y: 0 };
 
-// Connected Components
 let componentColors = [];
 let componentCount = 0;
 
-let finalPathCoords = []; // Lưu tọa độ đường đi chuẩn (không tính bước lùi)
-let showArrows = false;   // Cờ bật/tắt vẽ mũi tên
+let finalPathCoords = []; 
 
-// Speed Control
+let showArrows = false;   
+
 let speedMultiplier = 1;
 const BASE_SPEED = 6;
 
 const CELL = { FLOOR: 0, WALL: 1, START: 2, EXIT: 3, STAR: 4 };
 
-// Canvas
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 let cellSize = 32;
 
-// ============================================================
-// SCREEN MANAGEMENT
-// ============================================================
 function showScreen(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(id).classList.add('active');
@@ -141,9 +129,6 @@ function quitGame() {
     }, 1000);
 }
 
-// ============================================================
-// LỊCH SỬ STACK (LOG)
-// ============================================================
 function showStackLog() {
     document.getElementById('levelEndModal').classList.remove('active');
     const tbody = document.getElementById('stackLogBody');
@@ -176,9 +161,6 @@ function closeStackLog() {
     document.getElementById('levelEndModal').classList.add('active');
 }
 
-// ============================================================
-// MENU & SPEED
-// ============================================================
 function startGame() {
     state.startingAP = 10;
     state.level = 1;
@@ -201,9 +183,6 @@ function updateSpeed(val) {
     document.getElementById('speedValue').textContent = speedMultiplier.toFixed(1);
 }
 
-// ============================================================
-// LEVEL GENERATION
-// ============================================================
 function generateLevel() {
     const rewardBtn = document.getElementById('btnClaimReward');
     if (rewardBtn) rewardBtn.style.display = 'none';
@@ -212,8 +191,6 @@ function generateLevel() {
     if (animFrame) cancelAnimationFrame(animFrame);
     toggleStackPanel(false);
 
-
-    // Reset states
     componentColors = [];
     componentCount = 0;
     running = false;
@@ -292,9 +269,6 @@ function randomPos() { return { r: Math.floor(Math.random() * rows), c: Math.flo
 function distance(a, b) { return Math.abs(a.r - b.r) + Math.abs(a.c - b.c); }
 function posEq(a, b) { return a.r === b.r && a.c === b.c; }
 
-// ============================================================
-// RESTART & TOOLS
-// ============================================================
 function restartLevel() {
     const rewardBtn = document.getElementById('btnClaimReward');
     if (rewardBtn) rewardBtn.style.display = 'none';
@@ -346,15 +320,18 @@ canvas.addEventListener('click', e => {
     if (r < 0 || r >= rows || c < 0 || c >= cols) return;
 
     if (currentTool === 'build' && grid[r][c] === CELL.FLOOR && actionPoints > 0) {
-        grid[r][c] = CELL.WALL; actionPoints--; updateHUD(); drawGrid();
-    } else if (currentTool === 'destroy' && grid[r][c] === CELL.WALL && actionPoints > 0) {
-        grid[r][c] = CELL.FLOOR; actionPoints--; updateHUD(); drawGrid();
+        grid[r][c] = CELL.WALL; 
+        actionPoints--;
+        updateHUD(); 
+        drawGrid();
+    } else if (currentTool === 'destroy' && grid[r][c] === CELL.WALL) {
+        grid[r][c] = CELL.FLOOR; 
+        actionPoints++;
+        updateHUD(); 
+        drawGrid();
     }
 });
 
-// ============================================================
-// STACK & DFS LOGIC
-// ============================================================
 function renderStackUI(stackArr) {
     const content = document.getElementById('stackContent');
     if (!stackArr || stackArr.length === 0) {
@@ -366,7 +343,8 @@ function renderStackUI(stackArr) {
         const isTop = index === 0;
         return `<div class="stack-item ${isTop ? 'top' : ''}">${isTop ? '📍 ' : ''}${item}</div>`;
     }).join('');
-    content.scrollTop = 0; // Tự động cuộn lên đầu (phần tử mới nhất)
+    content.scrollTop = 0; 
+
 }
 
 function findConnectedComponents() {
@@ -400,7 +378,8 @@ function runDFS() {
     if (!running) {
         findConnectedComponents();
         running = true; isPaused = false; pathIdx = 0; starsOnPath = [];
-        showArrows = false; // Reset cờ mũi tên
+        showArrows = false; 
+
         toggleStackPanel(true);
 
         const workGrid = grid.map(row => [...row]);
@@ -408,19 +387,19 @@ function runDFS() {
         dfsPath = [];
         let currentStack = [];
 
-        let currentPathCoords = []; // Track đường đi hiện tại
-        finalPathCoords = []; // Reset đường đi cuối cùng
+        let currentPathCoords = []; 
+
+        finalPathCoords = []; 
 
         const dfs = (r, c, pR, pC) => {
             if (r < 0 || r >= rows || c < 0 || c >= cols || visited[r][c] || workGrid[r][c] === CELL.WALL) return false;
             visited[r][c] = true;
 
             currentStack.push(`[C${c}, D${r}]`);
-            currentPathCoords.push({ r, c }); // Lưu tọa độ vào path tạm
+            currentPathCoords.push({ r, c }); 
 
             dfsPath.push({ r, c, type: workGrid[r][c], isBacktrack: false, stackState: [...currentStack] });
 
-            // Nếu đến đích, CHỐT đường đi thành công
             if (workGrid[r][c] === CELL.EXIT) {
                 finalPathCoords = [...currentPathCoords];
                 return true;
@@ -430,7 +409,7 @@ function runDFS() {
             for (const [dr, dc] of dirs) if (dfs(r + dr, c + dc, r, c)) return true;
 
             currentStack.pop();
-            currentPathCoords.pop(); // Rút lui thì xóa tọa độ khỏi path tạm
+            currentPathCoords.pop(); 
 
             if (pR !== undefined) dfsPath.push({ r: pR, c: pC, type: workGrid[pR][pC], isBacktrack: true, stackState: [...currentStack] });
             return false;
@@ -455,20 +434,17 @@ function animate() {
         running = false;
         updateRunButton();
 
-        // KÍCH HOẠT VẼ MŨI TÊN
         showArrows = true;
         drawGrid(); 
         drawHero(); 
 
         showNotif('Hoàn thành! Nhấn nút để nhận thưởng.', 3000);
 
-        // Gọi hàm hiện nút thay vì dùng setTimeout đếm ngược
         showRewardButton(starsOnPath);
 
         return;
     }
 
-    // ... (Phần code tính toán tọa độ hero bên dưới giữ y nguyên như cũ)
     const step = dfsPath[pathIdx];
     const targetX = step.c * cellSize + cellSize / 2, targetY = step.r * cellSize + cellSize / 2;
     const speed = BASE_SPEED * speedMultiplier;
@@ -495,9 +471,6 @@ function animate() {
     animFrame = requestAnimationFrame(animate);
 }
 
-// ============================================================
-// DRAWING & UI UPDATES
-// ============================================================
 const COLORS = {
     floor: '#1C1410', wall: '#3D2B1F', wallTop: '#5C4030', start: '#064E3B',
     exit: '#1E3A8A', grid: '#2D1F15', visited: 'rgba(56, 189, 248, 0.25)', backtracked: 'rgba(239, 68, 68, 0.35)',
@@ -505,8 +478,7 @@ const COLORS = {
 
 function drawGrid() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
-    // 1. VẼ TOÀN BỘ SÀN VÀ TƯỜNG TRƯỚC
+
     for (let r = 0; r < rows; r++) {
         for (let c = 0; c < cols; c++) {
             const x = c * cellSize, y = r * cellSize;
@@ -533,13 +505,13 @@ function drawGrid() {
                 ctx.fillStyle = COLORS.wall; ctx.fillRect(x, y, cellSize, cellSize);
                 ctx.fillStyle = COLORS.wallTop; ctx.fillRect(x, y, cellSize, 4);
             }
-            
+
             const fs = Math.floor(cellSize * 0.55);
             ctx.font = `${fs}px sans-serif`; 
             ctx.textAlign = 'center'; 
             ctx.textBaseline = 'middle';
             const cx = x + cellSize / 2, cy = y + cellSize / 2;
-            
+
             if (grid[r][c] === CELL.START) { 
                 ctx.fillStyle = COLORS.start; 
                 ctx.fillRect(x + 1, y + 1, cellSize - 2, cellSize - 2); 
@@ -554,17 +526,17 @@ function drawGrid() {
         }
     }
 
-    // 2. VẼ ĐƯỜNG ĐI LIỀN MẠCH (Nằm ngoài 2 vòng lặp trên)
     if (showArrows && finalPathCoords && finalPathCoords.length > 0) {
         ctx.beginPath();
-        
-        // Cấu hình nét vẽ để tạo cảm giác "đường ống" mượt mà
-        ctx.strokeStyle = '#FDE047'; // Màu vàng sáng
-        ctx.lineWidth = Math.max(4, Math.floor(cellSize * 0.25)); // Độ dày linh hoạt theo kích thước ô
-        ctx.lineCap = 'round'; // Bo tròn điểm đầu và điểm cuối
-        ctx.lineJoin = 'round'; // Bo tròn các góc cua (RẤT QUAN TRỌNG ĐỂ NHÌN MƯỢT)
-        
-        // Hiệu ứng phát sáng nhẹ
+
+        ctx.strokeStyle = '#FDE047'; 
+
+        ctx.lineWidth = Math.max(4, Math.floor(cellSize * 0.25)); 
+
+        ctx.lineCap = 'round'; 
+
+        ctx.lineJoin = 'round'; 
+
         ctx.shadowColor = '#F59E0B'; 
         ctx.shadowBlur = 8;
 
@@ -574,15 +546,16 @@ function drawGrid() {
             const cy = curr.r * cellSize + cellSize / 2;
 
             if (i === 0) {
-                ctx.moveTo(cx, cy); // Bắt đầu từ tâm ô đầu tiên
+                ctx.moveTo(cx, cy); 
+
             } else {
-                ctx.lineTo(cx, cy); // Kéo vạch tới tâm các ô tiếp theo
+                ctx.lineTo(cx, cy); 
+
             }
         }
-        
-        ctx.stroke(); // Thực thi lệnh vẽ đường
 
-        // Reset lại hiệu ứng bóng đổ để không ảnh hưởng tới nhân vật hay các element khác
+        ctx.stroke(); 
+
         ctx.shadowColor = 'transparent';
         ctx.shadowBlur = 0;
     }
@@ -612,9 +585,6 @@ function updateRunButton() {
     }
 }
 
-// ============================================================
-// LOOT, END GAME & COLLECTION
-// ============================================================
 function rollSword() {
     const total = Object.values(RARITY_WEIGHTS).reduce((a, b) => a + b, 0);
     let roll = Math.random() * total;
@@ -626,10 +596,10 @@ function rollSword() {
 
 function showLootSequence(starsOnPath, callback) {
     if (starsOnPath.length === 0) { callback(); return; }
-    
+
     const loot = starsOnPath.map(() => rollSword());
     state.pendingLoot = loot;
-    
+
     document.getElementById('lootContent').innerHTML = loot.map(s => `
         <div class="loot-item loot-${s.rarity}">
           <div class="loot-sword-art">${s.icon}</div>
@@ -639,19 +609,18 @@ function showLootSequence(starsOnPath, callback) {
             <div class="loot-desc">${s.desc}</div>
           </div>
         </div>`).join('');
-        
+
     document.getElementById('lootModal').classList.add('active');
-    
+
     const btnContinue = document.getElementById('lootContinue');
-    btnContinue.disabled = false; // Đảm bảo nút ở trạng thái bật
-    
-    // Gán lại sự kiện onclick
+    btnContinue.disabled = false; 
+
     btnContinue.onclick = (e) => {
         e.preventDefault();
-        btnContinue.disabled = true; // Khóa nút ngay lập tức để chống spam nháy đúp
+        btnContinue.disabled = true; 
+
         closeAllModals(); 
-        
-        // Dùng setTimeout 300ms để tạo độ trễ, ngăn lỗi click xuyên tới modal bên dưới
+
         setTimeout(() => {
             callback();
         }, 300);
@@ -700,24 +669,22 @@ function renderCollection() {
     }).join('');
 }
 
-// ============================================================
-// NÚT CHUYỂN MÀN THỦ CÔNG
-// ============================================================
 function showRewardButton(starsOnPath) {
     let btn = document.getElementById('btnClaimReward');
-    
-    // Nếu nút chưa tồn tại thì tạo mới
+
     if (!btn) {
         btn = document.createElement('button');
         btn.id = 'btnClaimReward';
         btn.innerHTML = '🎁 Nhận Thưởng';
-        
-        // CẬP NHẬT CSS: Đưa nút xuống dưới cùng, căn giữa ngang
+
         Object.assign(btn.style, {
             position: 'absolute',
-            bottom: '20px',             // Cách mép dưới 20px
-            left: '50%',                // Căn giữa theo chiều ngang
-            transform: 'translateX(-50%)', // Đẩy lùi lại 50% chiều rộng của chính nó
+            bottom: '20px',             
+
+            left: '50%',                
+
+            transform: 'translateX(-50%)', 
+
             padding: '12px 30px',
             fontSize: '1.5rem',
             fontWeight: 'bold',
@@ -731,17 +698,16 @@ function showRewardButton(starsOnPath) {
             transition: 'transform 0.2s, background-color 0.2s'
         });
 
-        // Hiệu ứng Hover (phóng to nhẹ lên trên)
         btn.onmouseover = () => {
             btn.style.transform = 'translateX(-50%) scale(1.1)';
-            btn.style.backgroundColor = '#D97706'; // Đổi màu đậm hơn xíu
+            btn.style.backgroundColor = '#D97706'; 
+
         };
         btn.onmouseout = () => {
             btn.style.transform = 'translateX(-50%) scale(1)';
             btn.style.backgroundColor = '#F59E0B';
         };
 
-        // Chèn nút vào vùng chứa game
         const gameArea = document.querySelector('.game-area');
         if (gameArea) {
             gameArea.style.position = 'relative'; 
@@ -750,21 +716,19 @@ function showRewardButton(starsOnPath) {
             document.body.appendChild(btn);
         }
     }
-    
+
     btn.style.display = 'block'; 
-    
-    // Xử lý sự kiện click
+
     btn.onclick = () => {
         btn.style.display = 'none'; 
         showArrows = false; 
         drawGrid(); 
         drawHero();
-        
+
         showLootSequence(starsOnPath, () => showLevelEnd(starsOnPath.length));
     };
 }
 
-// Animation loop for pulsing stars
 setInterval(() => { if (!running) drawGrid(); }, 100);
 
 updateHUD();
