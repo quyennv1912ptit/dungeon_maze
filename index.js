@@ -351,26 +351,44 @@ function findConnectedComponents() {
     const visited = Array.from({ length: rows }, () => Array(cols).fill(false));
     componentColors = Array.from({ length: rows }, () => Array(cols).fill(null));
     componentCount = 0;
+
     const isFloor = (t) => t !== CELL.WALL;
 
+    // Hàm DFS
+    function dfs(r, c, color) {
+        visited[r][c] = true;
+        componentColors[r][c] = color;
+
+        const dirs = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+
+        for (const [dr, dc] of dirs) {
+            const nr = r + dr;
+            const nc = c + dc;
+
+            if (
+                nr >= 0 && nr < rows &&
+                nc >= 0 && nc < cols &&
+                isFloor(grid[nr][nc]) &&
+                !visited[nr][nc]
+            ) {
+                dfs(nr, nc, color); // 
+            }
+        }
+    }
+
+    // Duyệt toàn bộ grid
     for (let r = 0; r < rows; r++) {
         for (let c = 0; c < cols; c++) {
             if (isFloor(grid[r][c]) && !visited[r][c]) {
                 componentCount++;
+
                 const color = `hsla(${(componentCount * 137.5) % 360}, 60%, 40%, 0.35)`;
-                const q = [{ r, c }]; visited[r][c] = true;
-                while (q.length > 0) {
-                    const curr = q.shift(); componentColors[curr.r][curr.c] = color;
-                    [[-1, 0], [1, 0], [0, -1], [0, 1]].forEach(([dr, dc]) => {
-                        const nr = curr.r + dr, nc = curr.c + dc;
-                        if (nr >= 0 && nr < rows && nc >= 0 && nc < cols && isFloor(grid[nr][nc]) && !visited[nr][nc]) {
-                            visited[nr][nc] = true; q.push({ r: nr, c: nc });
-                        }
-                    });
-                }
+
+                dfs(r, c, color); // 🚀 gọi DFS
             }
         }
     }
+
     showNotif(`Tìm thấy ${componentCount} vùng liên thông!`, 3000);
 }
 
